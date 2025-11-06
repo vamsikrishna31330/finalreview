@@ -1,0 +1,29 @@
+.user-management-page {
+  display: grid;
+  gap: 2rem;
+}
+
+.user-management-page .toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.user-management-page .toolbar label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.user-management-page .toolbar select {
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  padding: 0.45rem 0.65rem;
+}
+
+.user-form {
+  display: grid;
+  gap: 1.5rem;
+}

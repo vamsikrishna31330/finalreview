@@ -1,0 +1,24 @@
+.resource-detail {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.resource-detail .overview {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.resource-detail dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.resource-detail dt {
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.resource-detail dd {
+  margin: 0;
+}

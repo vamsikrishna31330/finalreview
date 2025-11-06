@@ -1,0 +1,17 @@
+.events-page {
+  display: grid;
+  gap: 2rem;
+}
+
+.events-page .event-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.events-page .card {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 16px 40px rgba(19, 58, 27, 0.08);
+}

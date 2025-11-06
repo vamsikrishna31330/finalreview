@@ -1,0 +1,9 @@
+.notifications-page {
+  display: grid;
+  gap: 2rem;
+}
+
+.notification-form {
+  display: grid;
+  gap: 1.5rem;
+}

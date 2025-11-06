@@ -1,0 +1,40 @@
+.metric-card {
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  background: var(--color-surface);
+  box-shadow: 0 12px 34px rgba(19, 64, 27, 0.08);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.metric-card.primary {
+  border-color: rgba(43, 138, 62, 0.3);
+}
+
+.metric-card.secondary {
+  border-color: rgba(245, 159, 0, 0.3);
+}
+
+.metric-card.accent {
+  border-color: rgba(77, 146, 223, 0.3);
+}
+
+.metric-title {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.metric-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}

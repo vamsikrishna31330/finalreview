@@ -1,0 +1,9 @@
+.connections-page {
+  display: grid;
+  gap: 2rem;
+}
+
+.connection-form {
+  display: grid;
+  gap: 1.5rem;
+}

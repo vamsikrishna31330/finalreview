@@ -1,0 +1,190 @@
+.login-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.login-page .background {
+  position: absolute;
+  inset: 0;
+}
+
+.login-page .background .image {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=2000&q=80')
+    center/cover no-repeat;
+  filter: brightness(0.6);
+}
+
+.login-page .background .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(19, 64, 27, 0.88), rgba(40, 120, 54, 0.75));
+}
+
+.login-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(1.75rem, 4vw, 2.75rem);
+  align-items: stretch;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.intro {
+  color: #f8fff3;
+  display: grid;
+  gap: 1.5rem;
+  padding: 3rem;
+  background: linear-gradient(155deg, rgba(27, 102, 44, 0.85), rgba(31, 120, 54, 0.75));
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 32px 72px rgba(12, 40, 22, 0.45);
+}
+
+.intro h1 {
+  font-size: 2.75rem;
+  line-height: 1.1;
+}
+
+.intro ul {
+  display: grid;
+  gap: 0.75rem;
+  font-size: 1.05rem;
+  list-style: none;
+}
+
+.intro ul li::before {
+  content: '•';
+  margin-right: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.login-content .card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 28px 70px rgba(15, 42, 26, 0.35);
+  display: grid;
+  gap: 1.35rem;
+  min-width: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.auth-switcher {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: rgba(43, 138, 62, 0.12);
+  border: 1px solid rgba(43, 138, 62, 0.22);
+  align-self: flex-start;
+  gap: 0.25rem;
+}
+
+.auth-switcher button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-switcher button.active {
+  background: linear-gradient(135deg, #2b8a3e, #1f6a2f);
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(20, 68, 32, 0.28);
+}
+
+.card form {
+  display: grid;
+  gap: 1rem;
+}
+
+.card label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.card input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.card button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #2b8a3e, #1f6a2f);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.signup-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.error {
+  color: #d64545;
+}
+
+.seeded-users {
+  background: rgba(43, 138, 62, 0.08);
+  border-radius: 14px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.available-roles .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.available-roles span {
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  background: rgba(245, 159, 0, 0.12);
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .login-content {
+    gap: 1.5rem;
+  }
+  .intro {
+    padding: 2rem;
+  }
+}

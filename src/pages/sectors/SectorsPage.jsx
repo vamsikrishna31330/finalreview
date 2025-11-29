@@ -3,10 +3,11 @@ import PageHeader from '../../components/PageHeader.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Modal from '../../components/Modal.jsx';
 import FormSection from '../../components/forms/FormSection.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
 import Button from '../../components/Button.jsx';
+import EmptyState from '../../components/EmptyState.jsx';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
+import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import './SectorsPage.css';
 
@@ -19,12 +20,30 @@ const initialForm = {
 };
 
 const SectorsPage = () => {
-  const { data: sectors, loading } = useSqlQuery('SELECT * FROM sectors ORDER BY name ASC');
-  const { run } = useDatabase();
+  const { user } = useAuth();
   const { pushNotification } = useUI();
+  const { data: sectors, create, update, delete: remove, loading, error } = useTempStore(
+    'sectors',
+    'SELECT * FROM sectors ORDER BY name ASC'
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
+
+  // Debug logging
+  console.log('SectorsPage debug:', { sectors, loading, error });
+
+  if (error) {
+    console.error('SectorsPage error:', error);
+    return (
+      <div className="sectors-page">
+        <PageHeader title="Sector partners" subtitle="Error loading sectors" />
+        <div className="card">
+          <p>Error: {error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   const categories = useMemo(
     () => ['Finance', 'Logistics', 'Technology', 'Marketplace', 'Soil', 'Climate', 'Research'],
@@ -49,9 +68,23 @@ const SectorsPage = () => {
     setModalOpen(true);
   };
 
-  const removeSector = (sector) => {
-    run('DELETE FROM sectors WHERE id = ?', [sector.id]);
-    pushNotification({ title: 'Sector removed', message: sector.name, status: 'warning' });
+  const handleDelete = (sector) => {
+    try {
+      console.log('Deleting sector:', sector);
+      remove(sector.id);
+      pushNotification({
+        title: 'Sector removed',
+        message: `${sector.name} deleted (temporary)`,
+        status: 'warning'
+      });
+    } catch (error) {
+      console.error('Delete error:', error);
+      pushNotification({
+        title: 'Error',
+        message: 'Failed to delete sector',
+        status: 'error'
+      });
+    }
   };
 
   const handleSubmit = (event) => {
@@ -59,14 +92,30 @@ const SectorsPage = () => {
     if (!form.name.trim()) {
       return;
     }
-    const values = [form.name, form.type, form.contact, form.region, form.description];
-    if (editingId) {
-      run('UPDATE sectors SET name = ?, type = ?, contact = ?, region = ?, description = ? WHERE id = ?', [...values, editingId]);
-      pushNotification({ title: 'Sector updated', message: form.name, status: 'success' });
-    } else {
-      run('INSERT INTO sectors (name, type, contact, region, description) VALUES (?, ?, ?, ?, ?)', values);
-      pushNotification({ title: 'Sector added', message: form.name, status: 'success' });
+    const payload = {
+      name: form.name,
+      type: form.type,
+      contact: form.contact,
+      region: form.region,
+      description: form.description
+    };
+    
+    try {
+      console.log('Submitting sector:', payload);
+      if (editingId) {
+        console.log('Updating sector:', editingId);
+        update(editingId, payload);
+        pushNotification({ title: 'Sector updated (temporary)', message: form.name, status: 'success' });
+      } else {
+        console.log('Creating sector');
+        create(payload);
+        pushNotification({ title: 'Sector added (temporary)', message: form.name, status: 'success' });
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+      pushNotification({ title: 'Error', message: 'Failed to save sector', status: 'error' });
     }
+    
     setModalOpen(false);
   };
 
@@ -91,7 +140,7 @@ const SectorsPage = () => {
             data={sectors}
             actions={[
               { label: 'Edit', onClick: openEdit },
-              { label: 'Delete', intent: 'danger', onClick: removeSector }
+              { label: 'Delete', intent: 'danger', onClick: handleDelete }
             ]}
             onRowClick={openEdit}
           />

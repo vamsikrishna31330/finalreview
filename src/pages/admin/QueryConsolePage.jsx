@@ -1,18 +1,18 @@
 import { useMemo, useState } from 'react';
 import PageHeader from '../../components/PageHeader.jsx';
 import Button from '../../components/Button.jsx';
-import { useDatabase } from '../../hooks/useDatabase.js';
+import { api } from '../../utils/api.js';
 import DataTable from '../../components/tables/DataTable.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import './QueryConsolePage.css';
 
-const defaultQuery = 'SELECT * FROM users LIMIT 10;';
+const defaultQuery = 'SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\' LIMIT 10;';
 
 const QueryConsolePage = () => {
-  const { runScript, query, run, exportDatabase, importDatabase, resetDatabase } = useDatabase();
   const [sql, setSql] = useState(defaultQuery);
   const [result, setResult] = useState({ columns: [], values: [] });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([{ sql: defaultQuery, timestamp: new Date().toISOString() }]);
 
   const hasRows = result.values?.length > 0;
@@ -30,66 +30,112 @@ const QueryConsolePage = () => {
     [result]
   );
 
-  const executeQuery = () => {
+  const executeQuery = async () => {
     try {
       const cleaned = sql.trim();
       if (!cleaned) {
         return;
       }
+      setLoading(true);
       setError(null);
-      if (cleaned.toLowerCase().startsWith('select')) {
-        const data = query(cleaned);
-        setResult({ columns: data.length ? Object.keys(data[0]) : [], values: data.map((row) => Object.values(row)) });
+
+      // Determine if it's a SELECT query or other query
+      const isSelect = cleaned.toLowerCase().startsWith('select');
+      
+      if (isSelect) {
+        // Use query endpoint for SELECT statements
+        const data = await api.query(cleaned, []);
+        console.log('SQL Console - SELECT query result:', data);
+        
+        if (data && Array.isArray(data)) {
+          setResult({ 
+            columns: data.length ? Object.keys(data[0]) : [], 
+            values: data.map((row) => Object.values(row)) 
+          });
+        } else {
+          setResult({ columns: [], values: [] });
+          setError('No data returned from query');
+        }
       } else {
-        const response = run(cleaned);
-        setResult({ columns: ['lastInsertId', 'changes'], values: [[response.lastInsertId, response.changes]] });
+        // Use run endpoint for INSERT, UPDATE, DELETE statements
+        const response = await api.run(cleaned, []);
+        console.log('SQL Console - RUN query result:', response);
+        
+        setResult({ 
+          columns: ['success', 'lastInsertId', 'changes'], 
+          values: [[true, response.lastInsertId || null, response.changes || 0]] 
+        });
       }
+      
       setHistory((prev) => [{ sql: cleaned, timestamp: new Date().toISOString() }, ...prev.slice(0, 9)]);
     } catch (err) {
-      setError(err.message);
+      console.error('SQL Console Error:', err);
+      setError(err.message || 'Failed to execute query');
+      setResult({ columns: [], values: [] });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleFileImport = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const buffer = new Uint8Array(reader.result);
-      importDatabase(buffer);
-      setHistory((prev) => [{ sql: '-- Imported database', timestamp: new Date().toISOString() }, ...prev]);
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  const handleSqlScript = () => {
-    if (!sql.trim()) {
-      return;
-    }
+  const checkDatabaseStatus = async () => {
     try {
-      runScript(sql);
-      setHistory((prev) => [{ sql: '-- Executed script', timestamp: new Date().toISOString() }, ...prev]);
+      setLoading(true);
       setError(null);
+      
+      // Check database connection and basic info
+      const data = await api.query('SELECT current_database() as database, current_user as user, version() as version', []);
+      console.log('SQL Console - Database status:', data);
+      
+      if (data && Array.isArray(data) && data.length > 0) {
+        const status = data[0];
+        setResult({ 
+          columns: ['Database Status', 'Value'], 
+          values: [
+            ['Database', status.database],
+            ['User', status.user],
+            ['Version', status.version.substring(0, 50) + '...']
+          ] 
+        });
+        setSql('-- Database connected successfully!');
+      } else {
+        setError('Database status check failed - no data returned');
+      }
     } catch (err) {
-      setError(err.message);
+      console.error('SQL Console - Database status error:', err);
+      setError(`Database connection failed: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const clearResults = () => {
+    setResult({ columns: [], values: [] });
+    setError(null);
+  };
+
+  const loadSampleQueries = () => {
+    const sampleQueries = [
+      'SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\' ORDER BY table_name;',
+      'SELECT column_name, data_type FROM information_schema.columns WHERE table_name = \'users\' LIMIT 5;',
+      'SELECT COUNT(*) as total_records FROM users;',
+      'SELECT name, role FROM users WHERE role = \'admin\' LIMIT 5;',
+      'SELECT current_database(), current_user, version();'
+    ];
+    setHistory(prev => [...sampleQueries.map(sql => ({ sql, timestamp: new Date().toISOString() })), ...prev]);
   };
 
   return (
     <div className="query-console">
       <PageHeader
-        title="SQL console"
-        subtitle="Inspect or manipulate the client-side database with full transparency."
+        title="SQL Console"
+        subtitle="Execute SQL queries against the PostgreSQL database with full transparency."
         actions={
           <div className="console-actions">
-            <Button variant="ghost" onClick={() => exportDatabase()}>Download DB</Button>
-            <label className="upload">
-              Import DB
-              <input type="file" accept=".sqlite,.db,.bin" onChange={handleFileImport} />
-            </label>
-            <Button variant="ghost" onClick={() => resetDatabase()}>Reset to seed</Button>
+            <Button variant="ghost" onClick={checkDatabaseStatus} disabled={loading}>
+              {loading ? 'Checking...' : 'Check Database'}
+            </Button>
+            <Button variant="ghost" onClick={loadSampleQueries}>Load Sample Queries</Button>
+            <Button variant="ghost" onClick={clearResults}>Clear Results</Button>
           </div>
         }
       />
@@ -98,16 +144,24 @@ const QueryConsolePage = () => {
           <header>
             <h3>SQL Editor</h3>
             <div className="editor-actions">
-              <Button onClick={executeQuery}>Run query</Button>
-              <Button variant="secondary" onClick={handleSqlScript}>Run as script</Button>
+              <Button onClick={executeQuery} disabled={loading}>
+                {loading ? 'Running...' : 'Run Query'}
+              </Button>
             </div>
           </header>
-          <textarea value={sql} onChange={(event) => setSql(event.target.value)} rows={12} spellCheck="false" />
+          <textarea 
+            value={sql} 
+            onChange={(event) => setSql(event.target.value)} 
+            rows={12} 
+            spellCheck={false}
+            placeholder="Enter your SQL query here..."
+            disabled={loading}
+          />
           {error && <p className="error">{error}</p>}
         </section>
         <section className="history card">
           <header>
-            <h3>Recent statements</h3>
+            <h3>Query History</h3>
           </header>
           <ul>
             {history.map((item, index) => (
@@ -121,12 +175,12 @@ const QueryConsolePage = () => {
       </div>
       <section className="result card">
         <header>
-          <h3>Result</h3>
+          <h3>Results {loading && <span className="loading-indicator">(Loading...)</span>}</h3>
         </header>
         {hasRows ? (
           <DataTable columns={columns} data={rows} />
         ) : (
-          <EmptyState title="No rows" description="Execute a SELECT query to see tabular results." />
+          <EmptyState title="No results" description="Execute a SELECT query to see tabular results." />
         )}
       </section>
     </div>

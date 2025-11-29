@@ -52,14 +52,14 @@ const AppShell = () => {
           <div className="top-actions">
             <TopBarNotifications notifications={notifications} />
             <div className="profile-chip" onClick={() => navigate('/dashboard/user')} role="presentation">
-              <span className="avatar">{user?.name?.[0]?.toUpperCase()}</span>
-              <div>
-                <strong>{user?.name}</strong>
-                <small>{user?.role}</small>
+              <span className="avatar">👤</span>
+              <div className="profile-info">
+                <div className="profile-name">{user?.name}</div>
+                <div className="profile-role">{user?.role}</div>
               </div>
             </div>
-            <button type="button" className="ghost" onClick={logout}>
-              Log out
+            <button type="button" className="logout-btn" onClick={logout}>
+              🚪 Logout
             </button>
           </div>
         </header>

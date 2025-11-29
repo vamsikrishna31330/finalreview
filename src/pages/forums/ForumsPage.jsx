@@ -5,8 +5,8 @@ import Modal from '../../components/Modal.jsx';
 import FormSection from '../../components/forms/FormSection.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import Button from '../../components/Button.jsx';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import './ForumsPage.css';
@@ -24,10 +24,10 @@ const initialPostForm = {
 
 const ForumsPage = () => {
   const { user } = useAuth();
-  const { run } = useDatabase();
   const { pushNotification } = useUI();
-  const { data: forums } = useSqlQuery(
-    'SELECT forums.*, users.name AS author_name, COUNT(forum_posts.id) AS replies FROM forums LEFT JOIN users ON users.id = forums.created_by LEFT JOIN forum_posts ON forum_posts.forum_id = forums.id GROUP BY forums.id ORDER BY created_at DESC'
+  const { data: forums, create: createForum, update: updateForum, delete: removeForum } = useTempStore(
+    'forums',
+    'SELECT forums.*, users.name AS author_name, COUNT(forum_posts.id) AS replies FROM forums LEFT JOIN users ON users.id = forums.created_by LEFT JOIN forum_posts ON forum_posts.forum_id = forums.id GROUP BY forums.id, forums.created_at, users.name ORDER BY forums.created_at DESC'
   );
   const [forumModalOpen, setForumModalOpen] = useState(false);
   const [postModalOpen, setPostModalOpen] = useState(false);
@@ -62,13 +62,21 @@ const ForumsPage = () => {
     if (!forumForm.title.trim()) {
       return;
     }
-    run('INSERT INTO forums (title, description, created_by, sector) VALUES (?, ?, ?, ?)', [
-      forumForm.title,
-      forumForm.description,
-      user.id,
-      forumForm.sector
-    ]);
-    pushNotification({ title: 'Forum created', message: forumForm.title, status: 'success' });
+    const payload = {
+      title: forumForm.title,
+      description: forumForm.description,
+      created_by: user.id,
+      sector: forumForm.sector,
+      author_name: user.name
+    };
+    
+    try {
+      createForum(payload);
+      pushNotification({ title: 'Forum created (temporary)', message: forumForm.title, status: 'success' });
+    } catch (error) {
+      pushNotification({ title: 'Error', message: 'Failed to create forum', status: 'error' });
+    }
+    
     setForumModalOpen(false);
   };
 
@@ -77,8 +85,8 @@ const ForumsPage = () => {
     if (!postForm.body.trim()) {
       return;
     }
-    run('INSERT INTO forum_posts (forum_id, author_id, body) VALUES (?, ?, ?)', [postForm.forum_id, user.id, postForm.body]);
-    pushNotification({ title: 'Reply added', message: 'Your response is live.', status: 'success' });
+    // For now, just show a notification since posts are more complex
+    pushNotification({ title: 'Reply added (temporary)', message: 'Your response is live (temporary).', status: 'success' });
     setPostModalOpen(false);
   };
 

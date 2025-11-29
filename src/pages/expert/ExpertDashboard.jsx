@@ -12,7 +12,7 @@ const ExpertDashboard = () => {
     'SELECT content.*, users.name AS author_name FROM content LEFT JOIN users ON users.id = content.author_id ORDER BY published_at DESC LIMIT 5'
   );
   const { data: forums } = useSqlQuery(
-    'SELECT forums.*, COUNT(forum_posts.id) AS replies FROM forums LEFT JOIN forum_posts ON forum_posts.forum_id = forums.id GROUP BY forums.id ORDER BY created_at DESC LIMIT 5'
+    'SELECT forums.*, COUNT(forum_posts.id) AS replies FROM forums LEFT JOIN forum_posts ON forum_posts.forum_id = forums.id GROUP BY forums.id, forums.created_at ORDER BY forums.created_at DESC LIMIT 5'
   );
   const { data: farmerQueries } = useSqlQuery(
     "SELECT forum_posts.*, forums.title AS forum_title, users.name AS author_name FROM forum_posts JOIN forums ON forums.id = forum_posts.forum_id JOIN users ON users.id = forum_posts.author_id WHERE forums.sector = 'Technology' ORDER BY created_at DESC LIMIT 6"

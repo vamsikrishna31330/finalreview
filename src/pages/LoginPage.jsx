@@ -65,14 +65,14 @@ const LoginPage = () => {
     }
     setSignupLoading(true);
     try {
-      const existing = query('SELECT id FROM users WHERE email = ?', [signupForm.email.trim()]);
+      const existing = await query('SELECT id FROM users WHERE email = $1', [signupForm.email.trim()]);
       if (existing.length) {
         setSignupError('An account with this email already exists');
         setSignupLoading(false);
         return;
       }
       run(
-        'INSERT INTO users (name, email, password, role, location, organization) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO users (name, email, password, role, location, organization) VALUES ($1, $2, $3, $4, $5, $6)',
         [
           signupForm.name.trim(),
           signupForm.email.trim(),
@@ -103,6 +103,27 @@ const LoginPage = () => {
       setSignupError(err.message);
     } finally {
       setSignupLoading(false);
+    }
+  };
+
+  const demoAccounts = [
+    { email: 'asha@agriplatform.com', password: 'admin123', role: 'Admin', label: 'Admin Demo' },
+    { email: 'ravi@farmers.com', password: 'farmer123', role: 'Farmer', label: 'Farmer Demo' },
+    { email: 'meera@experts.com', password: 'expert123', role: 'Expert', label: 'Expert Demo' },
+    { email: 'neha@public.com', password: 'public123', role: 'Public', label: 'Public Demo' }
+  ];
+
+  const handleDemoLogin = async (demoAccount) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const profile = await login(demoAccount.email, demoAccount.password);
+      const redirectPath = location.state?.from?.pathname ?? `/dashboard/${profile.role}`;
+      navigate(redirectPath, { replace: true });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,6 +188,23 @@ const LoginPage = () => {
                   {loading ? 'Signing in...' : 'Access dashboard'}
                 </button>
               </form>
+              
+              <div className="demo-section">
+                <h4>Quick Demo Login</h4>
+                <div className="demo-buttons">
+                  {demoAccounts.map((demo) => (
+                    <button
+                      key={demo.email}
+                      type="button"
+                      className="demo-btn"
+                      onClick={() => handleDemoLogin(demo)}
+                      disabled={loading}
+                    >
+                      {demo.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </>
           ) : (
             <>

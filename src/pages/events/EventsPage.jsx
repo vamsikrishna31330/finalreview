@@ -5,8 +5,8 @@ import Modal from '../../components/Modal.jsx';
 import FormSection from '../../components/forms/FormSection.jsx';
 import Button from '../../components/Button.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import './EventsPage.css';
@@ -22,9 +22,9 @@ const defaultEventForm = {
 
 const EventsPage = () => {
   const { user } = useAuth();
-  const { run } = useDatabase();
   const { pushNotification } = useUI();
-  const { data: events } = useSqlQuery(
+  const { data: events, create, update, delete: remove } = useTempStore(
+    'events',
     'SELECT events.*, sectors.name AS sector_name, users.name AS creator_name FROM events LEFT JOIN sectors ON sectors.id = events.sector_id LEFT JOIN users ON users.id = events.created_by ORDER BY start_date ASC'
   );
   const { data: sectors } = useSqlQuery('SELECT id, name FROM sectors ORDER BY name ASC');
@@ -54,8 +54,8 @@ const EventsPage = () => {
   };
 
   const removeEvent = (eventItem) => {
-    run('DELETE FROM events WHERE id = ?', [eventItem.id]);
-    pushNotification({ title: 'Event removed', message: eventItem.name, status: 'warning' });
+    remove(eventItem.id);
+    pushNotification({ title: 'Event removed (temporary)', message: eventItem.name, status: 'warning' });
   };
 
   const handleSubmit = (submitEvent) => {
@@ -63,28 +63,29 @@ const EventsPage = () => {
     if (!form.name.trim()) {
       return;
     }
-    const values = [
-      form.name,
-      form.description,
-      form.start_date,
-      form.end_date,
-      form.location,
-      form.sector_id ? Number(form.sector_id) : null,
-      user.id
-    ];
-    if (editingId) {
-      run(
-        'UPDATE events SET name = ?, description = ?, start_date = ?, end_date = ?, location = ?, sector_id = ?, created_by = ? WHERE id = ?',
-        [...values, editingId]
-      );
-      pushNotification({ title: 'Event updated', message: form.name, status: 'success' });
-    } else {
-      run(
-        'INSERT INTO events (name, description, start_date, end_date, location, sector_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        values
-      );
-      pushNotification({ title: 'Event created', message: form.name, status: 'success' });
+    const payload = {
+      name: form.name,
+      description: form.description,
+      start_date: form.start_date,
+      end_date: form.end_date,
+      location: form.location,
+      sector_id: form.sector_id ? Number(form.sector_id) : null,
+      created_by: user.id,
+      creator_name: user.name
+    };
+    
+    try {
+      if (editingId) {
+        update(editingId, payload);
+        pushNotification({ title: 'Event updated (temporary)', message: form.name, status: 'success' });
+      } else {
+        create(payload);
+        pushNotification({ title: 'Event created (temporary)', message: form.name, status: 'success' });
+      }
+    } catch (error) {
+      pushNotification({ title: 'Error', message: 'Failed to save event', status: 'error' });
     }
+    
     setModalOpen(false);
   };
 

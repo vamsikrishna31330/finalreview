@@ -23,10 +23,10 @@ const FarmerDashboard = () => {
 
   const metrics = useMemo(
     () => ({
-      totalResources: resources?.length ?? 0,
-      upcomingEvents: events?.length ?? 0,
-      activeConnections: connections?.filter((item) => item.status !== 'pending').length ?? 0,
-      discussionBoards: forums?.length ?? 0
+      totalResources: Array.isArray(resources) ? resources.length : 0,
+      upcomingEvents: Array.isArray(events) ? events.length : 0,
+      activeConnections: Array.isArray(connections) ? connections.filter((item) => item.status !== 'pending').length : 0,
+      discussionBoards: Array.isArray(forums) ? forums.length : 0
     }),
     [resources, events, connections, forums]
   );

@@ -5,8 +5,8 @@ import Modal from '../../components/Modal.jsx';
 import FormSection from '../../components/forms/FormSection.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import Button from '../../components/Button.jsx';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
 import { useUI } from '../../hooks/useUI.js';
 import './UserManagementPage.css';
 
@@ -20,8 +20,10 @@ const defaultForm = {
 };
 
 const UserManagementPage = () => {
-  const { data: users } = useSqlQuery('SELECT * FROM users ORDER BY created_at DESC');
-  const { run } = useDatabase();
+  const { data: users, create, update, delete: remove } = useTempStore(
+    'users',
+    'SELECT * FROM users ORDER BY created_at DESC'
+  );
   const { pushNotification } = useUI();
   const [filter, setFilter] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
@@ -65,8 +67,8 @@ const UserManagementPage = () => {
   };
 
   const removeUser = (user) => {
-    run('DELETE FROM users WHERE id = ?', [user.id]);
-    pushNotification({ title: 'User removed', message: user.name, status: 'warning' });
+    remove(user.id);
+    pushNotification({ title: 'User removed (temporary)', message: user.name, status: 'warning' });
   };
 
   const handleSubmit = (event) => {
@@ -74,17 +76,27 @@ const UserManagementPage = () => {
     if (!form.name.trim() || !form.email.trim() || !form.password.trim()) {
       return;
     }
-    const values = [form.name, form.email, form.password, form.role, form.location, form.organization];
-    if (editingId) {
-      run(
-        'UPDATE users SET name = ?, email = ?, password = ?, role = ?, location = ?, organization = ? WHERE id = ?',
-        [...values, editingId]
-      );
-      pushNotification({ title: 'User updated', message: form.name, status: 'success' });
-    } else {
-      run('INSERT INTO users (name, email, password, role, location, organization) VALUES (?, ?, ?, ?, ?, ?)', values);
-      pushNotification({ title: 'User created', message: form.name, status: 'success' });
+    const payload = {
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      role: form.role,
+      location: form.location,
+      organization: form.organization
+    };
+    
+    try {
+      if (editingId) {
+        update(editingId, payload);
+        pushNotification({ title: 'User updated (temporary)', message: form.name, status: 'success' });
+      } else {
+        create(payload);
+        pushNotification({ title: 'User created (temporary)', message: form.name, status: 'success' });
+      }
+    } catch (error) {
+      pushNotification({ title: 'Error', message: 'Failed to save user', status: 'error' });
     }
+    
     setModalOpen(false);
   };
 

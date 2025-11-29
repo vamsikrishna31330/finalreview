@@ -12,17 +12,18 @@ export const useSqlQuery = (sql, params = [], options = {}) => {
       return;
     }
     let cancelled = false;
-    const runQuery = () => {
+    const runQuery = async () => {
       try {
         setLoading(true);
-        const rows = query(sql, params);
+        const rows = await query(sql, params);
         if (!cancelled) {
-          setData(rows);
+          setData(rows || []);
           setError(null);
         }
       } catch (err) {
         if (!cancelled) {
           setError(err);
+          setData([]);
         }
       } finally {
         if (!cancelled) {

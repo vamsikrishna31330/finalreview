@@ -5,8 +5,8 @@ import Modal from '../../components/Modal.jsx';
 import FormSection from '../../components/forms/FormSection.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import Button from '../../components/Button.jsx';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
 import { useUI } from '../../hooks/useUI.js';
 import './NotificationsPage.css';
 
@@ -18,11 +18,11 @@ const defaultForm = {
 };
 
 const NotificationsPage = () => {
-  const { data: notifications } = useSqlQuery(
+  const { data: notifications, create, update, delete: remove } = useTempStore(
+    'notifications',
     'SELECT notifications.*, users.name AS user_name FROM notifications LEFT JOIN users ON users.id = notifications.user_id ORDER BY created_at DESC'
   );
   const { data: users } = useSqlQuery('SELECT id, name FROM users ORDER BY name ASC');
-  const { run } = useDatabase();
   const { pushNotification } = useUI();
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -48,8 +48,8 @@ const NotificationsPage = () => {
   };
 
   const removeNotification = (notification) => {
-    run('DELETE FROM notifications WHERE id = ?', [notification.id]);
-    pushNotification({ title: 'Notification deleted', message: notification.title, status: 'warning' });
+    remove(notification.id);
+    pushNotification({ title: 'Notification deleted (temporary)', message: notification.title, status: 'warning' });
   };
 
   const handleSubmit = (event) => {
@@ -57,14 +57,25 @@ const NotificationsPage = () => {
     if (!form.title.trim() || !form.message.trim()) {
       return;
     }
-    const values = [form.user_id ? Number(form.user_id) : null, form.title, form.message, form.level];
-    if (editingId) {
-      run('UPDATE notifications SET user_id = ?, title = ?, message = ?, level = ? WHERE id = ?', [...values, editingId]);
-      pushNotification({ title: 'Notification updated', message: form.title, status: 'success' });
-    } else {
-      run('INSERT INTO notifications (user_id, title, message, level) VALUES (?, ?, ?, ?)', values);
-      pushNotification({ title: 'Notification created', message: form.title, status: 'success' });
+    const payload = {
+      user_id: form.user_id ? Number(form.user_id) : null,
+      title: form.title,
+      message: form.message,
+      level: form.level
+    };
+    
+    try {
+      if (editingId) {
+        update(editingId, payload);
+        pushNotification({ title: 'Notification updated (temporary)', message: form.title, status: 'success' });
+      } else {
+        create(payload);
+        pushNotification({ title: 'Notification created (temporary)', message: form.title, status: 'success' });
+      }
+    } catch (error) {
+      pushNotification({ title: 'Error', message: 'Failed to save notification', status: 'error' });
     }
+    
     setModalOpen(false);
   };
 

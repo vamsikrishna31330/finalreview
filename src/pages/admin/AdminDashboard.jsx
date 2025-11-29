@@ -14,7 +14,7 @@ const AdminDashboard = () => {
     "SELECT notifications.*, users.name AS user_name FROM notifications LEFT JOIN users ON users.id = notifications.user_id ORDER BY created_at DESC LIMIT 6"
   );
   const { data: connections } = useSqlQuery(
-    'SELECT sector_connections.*, users.name AS user_name, sectors.name AS sector_name FROM sector_connections JOIN users ON users.id = sector_connections.user_id JOIN sectors ON sectors.id = sector_connections.sector_id ORDER BY created_at DESC LIMIT 5'
+    'SELECT sector_connections.*, users.name AS user_name, sectors.name AS sector_name FROM sector_connections JOIN users ON users.id = sector_connections.user_id JOIN sectors ON sectors.id = sector_connections.sector_id ORDER BY sector_connections.created_at DESC LIMIT 5'
   );
 
   const metrics = useMemo(

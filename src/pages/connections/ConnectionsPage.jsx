@@ -3,10 +3,11 @@ import PageHeader from '../../components/PageHeader.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Modal from '../../components/Modal.jsx';
 import FormSection from '../../components/forms/FormSection.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
 import Button from '../../components/Button.jsx';
+import EmptyState from '../../components/EmptyState.jsx';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
+import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import './ConnectionsPage.css';
 
@@ -18,13 +19,14 @@ const defaultForm = {
 };
 
 const ConnectionsPage = () => {
-  const { data: connections } = useSqlQuery(
-    'SELECT sector_connections.*, users.name AS user_name, sectors.name AS sector_name FROM sector_connections JOIN users ON users.id = sector_connections.user_id JOIN sectors ON sectors.id = sector_connections.sector_id ORDER BY created_at DESC'
+  const { user } = useAuth();
+  const { pushNotification } = useUI();
+  const { data: connections, create, update, delete: remove } = useTempStore(
+    'sector_connections',
+    'SELECT sector_connections.*, sectors.name AS sector_name, sectors.type AS sector_type FROM sector_connections JOIN sectors ON sectors.id = sector_connections.sector_id ORDER BY created_at DESC'
   );
   const { data: users } = useSqlQuery("SELECT id, name FROM users WHERE role IN ('farmer','admin') ORDER BY name ASC");
   const { data: sectors } = useSqlQuery('SELECT id, name FROM sectors ORDER BY name ASC');
-  const { run } = useDatabase();
-  const { pushNotification } = useUI();
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const [editingId, setEditingId] = useState(null);
@@ -50,8 +52,8 @@ const ConnectionsPage = () => {
   };
 
   const removeConnection = (connection) => {
-    run('DELETE FROM sector_connections WHERE id = ?', [connection.id]);
-    pushNotification({ title: 'Connection removed', message: `${connection.user_name} ↔ ${connection.sector_name}`, status: 'warning' });
+    remove(connection.id);
+    pushNotification({ title: 'Connection removed (temporary)', message: `${connection.user_name} ↔ ${connection.sector_name}`, status: 'warning' });
   };
 
   const handleSubmit = (event) => {
@@ -59,14 +61,25 @@ const ConnectionsPage = () => {
     if (!form.user_id || !form.sector_id) {
       return;
     }
-    const values = [Number(form.user_id), Number(form.sector_id), form.status, form.notes];
-    if (editingId) {
-      run('UPDATE sector_connections SET user_id = ?, sector_id = ?, status = ?, notes = ? WHERE id = ?', [...values, editingId]);
-      pushNotification({ title: 'Connection updated', message: 'Farmer-sector link updated', status: 'success' });
-    } else {
-      run('INSERT INTO sector_connections (user_id, sector_id, status, notes) VALUES (?, ?, ?, ?)', values);
-      pushNotification({ title: 'Connection created', message: 'New farmer-sector link created', status: 'success' });
+    const payload = {
+      user_id: Number(form.user_id),
+      sector_id: Number(form.sector_id),
+      status: form.status,
+      notes: form.notes
+    };
+    
+    try {
+      if (editingId) {
+        update(editingId, payload);
+        pushNotification({ title: 'Connection updated (temporary)', message: 'Farmer-sector link updated', status: 'success' });
+      } else {
+        create(payload);
+        pushNotification({ title: 'Connection created (temporary)', message: 'New farmer-sector link created', status: 'success' });
+      }
+    } catch (error) {
+      pushNotification({ title: 'Error', message: 'Failed to save connection', status: 'error' });
     }
+    
     setModalOpen(false);
   };
 

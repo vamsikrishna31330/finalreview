@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
   }, [ready]);
 
   const login = async (email, password) => {
-    const results = query(
-      'SELECT id, name, email, role, location, organization, avatar FROM users WHERE email = ? AND password = ?',
+    const results = await query(
+      'SELECT id, name, email, role, location, organization, avatar FROM users WHERE email = $1 AND password = $2',
       [email, password]
     );
     if (!results.length) {

@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSqlQuery } from '../../hooks/useSqlQuery.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
+import { useTempStore } from '../../hooks/useTempStore.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import PageHeader from '../../components/PageHeader.jsx';
@@ -25,9 +24,9 @@ const initialForm = {
 const ResourcesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { run } = useDatabase();
   const { pushNotification } = useUI();
-  const { data: resources } = useSqlQuery(
+  const { data: resources, create, update, delete: remove, loading, error } = useTempStore(
+    'resources',
     'SELECT resources.*, users.name AS author_name FROM resources LEFT JOIN users ON users.id = resources.created_by ORDER BY created_at DESC'
   );
   const [openModal, setOpenModal] = useState(false);
@@ -65,10 +64,10 @@ const ResourcesPage = () => {
   };
 
   const handleDelete = (resource) => {
-    run('DELETE FROM resources WHERE id = ?', [resource.id]);
+    remove(resource.id);
     pushNotification({
       title: 'Resource removed',
-      message: `${resource.title} deleted`,
+      message: `${resource.title} deleted (temporary)`,
       status: 'warning'
     });
   };
@@ -86,39 +85,25 @@ const ResourcesPage = () => {
       link: form.link,
       file_name: form.file_name,
       file_blob: form.file_blob,
-      created_by: user.id
+      created_by: user.id,
+      author_name: user.name
     };
-    if (editingId) {
-      run(
-        'UPDATE resources SET title = ?, category = ?, description = ?, link = ?, file_name = ?, file_blob = ? WHERE id = ?',
-        [
-          payload.title,
-          payload.category,
-          payload.description,
-          payload.link,
-          payload.file_name,
-          payload.file_blob,
-          editingId
-        ]
-      );
-      pushNotification({ title: 'Resource updated', message: payload.title, status: 'success' });
-    } else {
-      run(
-        'INSERT INTO resources (title, category, description, link, file_name, file_blob, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [
-          payload.title,
-          payload.category,
-          payload.description,
-          payload.link,
-          payload.file_name,
-          payload.file_blob,
-          payload.created_by
-        ]
-      );
-      pushNotification({ title: 'Resource added', message: payload.title, status: 'success' });
+    
+    try {
+      if (editingId) {
+        update(editingId, payload);
+        pushNotification({ title: 'Resource updated (temporary)', message: payload.title, status: 'success' });
+      } else {
+        create(payload);
+        pushNotification({ title: 'Resource added (temporary)', message: payload.title, status: 'success' });
+      }
+    } catch (error) {
+      pushNotification({ title: 'Error', message: 'Failed to save resource', status: 'error' });
     }
+    
     resetForm();
     setOpenModal(false);
+    setUploading(false);
   };
 
   const handleFileUpload = async (event) => {

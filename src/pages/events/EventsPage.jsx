@@ -32,6 +32,9 @@ const EventsPage = () => {
   const [form, setForm] = useState(defaultEventForm);
   const [editingId, setEditingId] = useState(null);
 
+  // Check if user has admin privileges
+  const isAdmin = user?.role === 'admin';
+
   const sectorOptions = useMemo(() => sectors.map((item) => ({ value: item.id, label: item.name })), [sectors]);
 
   const openCreate = () => {
@@ -94,7 +97,7 @@ const EventsPage = () => {
       <PageHeader
         title="Events & workshops"
         subtitle="Organize trainings, awareness drives, and sector meetups for farmers."
-        actions={<Button onClick={openCreate}>Create event</Button>}
+        actions={isAdmin ? <Button onClick={openCreate}>Create event</Button> : null}
       />
       <div className="card">
         {events.length ? (
@@ -107,8 +110,10 @@ const EventsPage = () => {
               { title: 'Location', accessor: 'location' }
             ]}
             data={events}
-            actions={[
+            actions={isAdmin ? [
               { label: 'Edit', onClick: openEdit },
+              { label: 'Delete', intent: 'danger', onClick: removeEvent }
+            ] : [
               { label: 'Delete', intent: 'danger', onClick: removeEvent }
             ]}
           />
@@ -116,7 +121,7 @@ const EventsPage = () => {
           <EmptyState
             title="No events scheduled"
             description="Use the button above to schedule awareness campaigns."
-            actions={<Button onClick={openCreate}>Plan event</Button>}
+            actions={isAdmin ? <Button onClick={openCreate}>Plan event</Button> : null}
           />
         )}
       </div>

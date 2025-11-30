@@ -11,6 +11,7 @@ import ExpertDashboard from './pages/expert/ExpertDashboard.jsx';
 import PublicPortal from './pages/public/PublicPortal.jsx';
 import ResourcesPage from './pages/resources/ResourcesPage.jsx';
 import ResourceDetailPage from './pages/resources/ResourceDetailPage.jsx';
+import VideoPlayerPage from './pages/resources/VideoPlayerPage.jsx';
 import ForumsPage from './pages/forums/ForumsPage.jsx';
 import EventsPage from './pages/events/EventsPage.jsx';
 import SectorsPage from './pages/sectors/SectorsPage.jsx';
@@ -59,6 +60,7 @@ const App = () => {
         </Route>
         <Route path="resources" element={<ResourcesPage />} />
         <Route path="resources/:id" element={<ResourceDetailPage />} />
+        <Route path="video/:id" element={<VideoPlayerPage />} />
         <Route path="forums" element={<ForumsPage />} />
         <Route path="events" element={<EventsPage />} />
         <Route path="sectors" element={<SectorsPage />} />

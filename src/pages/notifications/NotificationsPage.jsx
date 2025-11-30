@@ -7,6 +7,7 @@ import EmptyState from '../../components/EmptyState.jsx';
 import Button from '../../components/Button.jsx';
 import { useTempStore } from '../../hooks/useTempStore.js';
 import { useSqlQuery } from '../../hooks/useSqlQuery.js';
+import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import './NotificationsPage.css';
 
@@ -18,6 +19,7 @@ const defaultForm = {
 };
 
 const NotificationsPage = () => {
+  const { user } = useAuth();
   const { data: notifications, create, update, delete: remove } = useTempStore(
     'notifications',
     'SELECT notifications.*, users.name AS user_name FROM notifications LEFT JOIN users ON users.id = notifications.user_id ORDER BY created_at DESC'
@@ -27,6 +29,9 @@ const NotificationsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const [editingId, setEditingId] = useState(null);
+
+  // Check if user has admin privileges
+  const isAdmin = user?.role === 'admin';
 
   const userOptions = useMemo(() => [{ value: '', label: 'All users' }, ...users.map((user) => ({ value: user.id, label: user.name }))], [users]);
 
@@ -84,7 +89,7 @@ const NotificationsPage = () => {
       <PageHeader
         title="Platform notifications"
         subtitle="Broadcast updates, alerts, and reminders to the farming community."
-        actions={<Button onClick={openCreate}>Send notification</Button>}
+        actions={isAdmin ? <Button onClick={openCreate}>Send notification</Button> : null}
       />
       <div className="card">
         {notifications.length ? (
@@ -96,17 +101,19 @@ const NotificationsPage = () => {
               { title: 'Created at', accessor: 'created_at' }
             ]}
             data={notifications}
-            actions={[
+            actions={isAdmin ? [
               { label: 'Edit', onClick: openEdit },
               { label: 'Delete', intent: 'danger', onClick: removeNotification }
+            ] : [
+              { label: 'Delete', intent: 'danger', onClick: removeNotification }
             ]}
-            onRowClick={openEdit}
+            onRowClick={isAdmin ? openEdit : null}
           />
         ) : (
           <EmptyState
             title="No notifications yet"
             description="Use notifications to keep farmers informed about events, resources, and updates."
-            actions={<Button onClick={openCreate}>Send first notification</Button>}
+            actions={isAdmin ? <Button onClick={openCreate}>Send first notification</Button> : null}
           />
         )}
       </div>

@@ -56,43 +56,91 @@ class TempStore {
       }
     ];
 
-    // Sample resources
+    // Sample resources with both video and PDF versions
     this.resources = [
+      // Organic Farming Guide - PDF Version
       {
         id: 1,
         title: 'Organic Farming Guide',
         category: 'Guides',
-        description: 'Complete guide to organic farming practices',
-        link: 'https://example.com/organic-guide',
-        file_name: null,
-        file_blob: null,
+        description: 'Complete guide to organic farming practices - PDF version',
+        link: null,
+        file_name: 'organic_farming_guide.pdf',
+        file_blob: 'data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0Jyb2tlL1Jlc291cmNlczw8L0ZvbnQ8PC9GMSA4IDAgUj4+L1Byb2NTZXQgWy9QREYvVGV4dC9JbWFnZUIvSW1hZ2VDL0ltYWdlSV0+Pj4vTWVkaWFCb3hbPDwvTiAzL0xlbmd0aCAxMj4+XS9Db250ZW50cyAzIDAgUj4+ZW5kb2JqCjMgMCBvYmoKPDwvTGVuZ3RoIDQ1Pj4+c3RyZWFtCkJUClNhbXBsZSBQREYgZm9yIE9yZ2FuaWMgRmFybWluZyBHdWlkZQpUaGlzIGlzIGEgc2FtcGxlIFBERiBmaWxlIHRvIGRlbW9uc3RyYXRlIHRoZSBkb3dubG9hZCBmdW5jdGlvbmFsaXR5LgpFTmRzdHJlYW0KZW5kb2JqCg==',
+        file_type: 'document',
         created_by: 2,
         author_name: 'Ravi Kumar',
         created_at: '2024-01-15T10:00:00Z'
       },
+      // Organic Farming Guide - Video Version
       {
         id: 2,
+        title: 'Organic Farming Guide',
+        category: 'Guides',
+        description: 'Complete guide to organic farming practices - Video tutorial',
+        link: 'https://www.youtube.com/watch?v=gO-eYYJogL4',
+        file_name: 'organic_farming_guide.mp4',
+        file_blob: 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAs1tZGF0AAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0OCByMjYwMSBhMGNkN2QzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNSAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEwIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMAoAAAAAD2WIhAA3//728P4FNjuZQQAAAu5tb292AAAAbG12aGQAAAAAAAAAAAAAAAAAAAPoAAAAZAABAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACGHRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAEAAAAAAAAAZAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAgAAAAIAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAAGQAAAAAAAEAAAAAAZBtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAACgAAAAEAFXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAE7bWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAA+3N0YmwAAACXc3RzZAAAAAAAAAABAAAAh2F2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAgACAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAAxYXZjQwFkAAr/4QAYZ2QACqzZX4iIhAAAAwAEAAADAFAiSJHAEAAABhdG50OQ==',
+        file_type: 'video',
+        created_by: 3,
+        author_name: 'Meera Patel',
+        created_at: '2024-01-15T11:00:00Z'
+      },
+      // Crop Insurance Schemes - PDF Version
+      {
+        id: 3,
         title: 'Crop Insurance Schemes',
         category: 'Finance',
-        description: 'Government crop insurance schemes explained',
+        description: 'Government crop insurance schemes explained - PDF document',
         link: null,
-        file_name: 'insurance_schemes.pdf',
-        file_blob: null,
+        file_name: 'crop_insurance_schemes.pdf',
+        file_blob: 'data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0Jyb2tlL1Jlc291cmNlczw8L0ZvbnQ8PC9GMSA4IDAgUj4+L1Byb2NTZXQgWy9QREYvVGV4dC9JbWFnZUIvSW1hZ2VDL0ltYWdlSV0+Pj4vTWVkaWFCb3hbPDwvTiAzL0xlbmd0aCAxMj4+XS9Db250ZW50cyAzIDAgUj4+ZW5kb2JqCjMgMCBvYmoKPDwvTGVuZ3RoIDQ1Pj4+c3RyZWFtCkJUClNhbXBsZSBQREYgZm9yIENyb3AgSW5zdXJhbmNlIFNjaGVtZXMKVGhpcyBpcyBhIHNhbXBsZSBQREYgZmlsZSB0byBkZW1vbnN0cmF0ZSB0aGUgZG93bmxvYWQgZnVuY3Rpb25hbGl0eS4KRU5kc3RyZWFtCmVuZG9iago=',
+        file_type: 'document',
         created_by: 2,
         author_name: 'Ravi Kumar',
         created_at: '2024-01-10T14:30:00Z'
       },
+      // Crop Insurance Schemes - Video Version
       {
-        id: 3,
-        title: 'Drip Irrigation Manual',
-        category: 'Technology',
-        description: 'Installation and maintenance guide for drip irrigation',
-        link: 'https://example.com/drip-irrigation',
-        file_name: null,
-        file_blob: null,
+        id: 4,
+        title: 'Crop Insurance Schemes',
+        category: 'Finance',
+        description: 'Government crop insurance schemes explained - Video tutorial',
+        link: 'https://www.youtube.com/watch?v=IpNOETFFAFs',
+        file_name: 'crop_insurance_schemes.mp4',
+        file_blob: 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAs1tZGF0AAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0OCByMjYwMSBhMGNkN2QzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNSAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEwIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMAoAAAAAD2WIhAA3//728P4FNjuZQQAAAu5tb292AAAAbG12aGQAAAAAAAAAAAAAAAAAAAPoAAAAZAABAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACGHRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAEAAAAAAAAAZAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAgAAAAIAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAAGQAAAAAAAEAAAAAAZBtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAACgAAAAEAFXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAE7bWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAA+3N0YmwAAACXc3RzZAAAAAAAAAABAAAAh2F2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAgACAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAAxYXZjQwFkAAr/4QAYZ2QACqzZX4iIhAAAAwAEAAADAFAiSJHAEAAABhdG50OQ==',
+        file_type: 'video',
         created_by: 3,
         author_name: 'Meera Patel',
+        created_at: '2024-01-10T15:30:00Z'
+      },
+      // Drip Irrigation Manual - PDF Version
+      {
+        id: 5,
+        title: 'Drip Irrigation Manual',
+        category: 'Technology',
+        description: 'Installation and maintenance guide for drip irrigation - PDF manual',
+        link: null,
+        file_name: 'drip_irrigation_manual.pdf',
+        file_blob: 'data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0Jyb2tlL1Jlc291cmNlczw8L0ZvbnQ8PC9GMSA4IDAgUj4+L1Byb2NTZXQgWy9QREYvVGV4dC9JbWFnZUIvSW1hZ2VDL0ltYWdlSV0+Pj4vTWVkaWFCb3hbPDwvTiAzL0xlbmd0aCAxMj4+XS9Db250ZW50cyAzIDAgUj4+ZW5kb2JqCjMgMCBvYmoKPDwvTGVuZ3RoIDQ1Pj4+c3RyZWFtCkJUClNhbXBsZSBQREYgZm9yIERyaXAgSXJyaWdhdGlvbiBNYW51YWwKVGhpcyBpcyBhIHNhbXBsZSBQREYgZmlsZSB0byBkZW1vbnN0cmF0ZSB0aGUgZG93bmxvYWQgZnVuY3Rpb25hbGl0eS4KRU5kc3RyZWFtCmVuZG9iago=',
+        file_type: 'document',
+        created_by: 2,
+        author_name: 'Ravi Kumar',
         created_at: '2024-01-08T09:15:00Z'
+      },
+      // Drip Irrigation Manual - Video Version
+      {
+        id: 6,
+        title: 'Drip Irrigation Manual',
+        category: 'Technology',
+        description: 'Installation and maintenance guide for drip irrigation - Video demonstration',
+        link: 'https://www.youtube.com/watch?v=lUcp7g6raDs',
+        file_name: 'drip_irrigation_manual.mp4',
+        file_blob: 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAs1tZGF0AAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0OCByMjYwMSBhMGNkN2QzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNSAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEwIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMAoAAAAAD2WIhAA3//728P4FNjuZQQAAAu5tb292AAAAbG12aGQAAAAAAAAAAAAAAAAAAAPoAAAAZAABAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACGHRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAEAAAAAAAAAZAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAgAAAAIAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAAGQAAAAAAAEAAAAAAZBtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAACgAAAAEAFXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAE7bWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAA+3N0YmwAAACXc3RzZAAAAAAAAAABAAAAh2F2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAgACAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAAxYXZjQwFkAAr/4QAYZ2QACqzZX4iIhAAAAwAEAAADAFAiSJHAEAAABhdG50OQ==',
+        file_type: 'video',
+        created_by: 3,
+        author_name: 'Meera Patel',
+        created_at: '2024-01-08T10:15:00Z'
       }
     ];
 

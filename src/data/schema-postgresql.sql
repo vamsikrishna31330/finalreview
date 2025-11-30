@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS resources (
   link TEXT,
   file_name VARCHAR(255),
   file_blob TEXT,
+  file_type VARCHAR(50) DEFAULT 'document',
   created_by INTEGER,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id)

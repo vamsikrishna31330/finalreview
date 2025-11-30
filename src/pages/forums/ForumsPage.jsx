@@ -41,6 +41,9 @@ const ForumsPage = () => {
     selectedForum ? [selectedForum.id] : []
   );
 
+  // Check if user has admin privileges
+  const isAdmin = user?.role === 'admin';
+
   const sectors = useMemo(
     () => ['Technology', 'Finance', 'Logistics', 'Marketplace', 'Soil', 'Climate'],
     []
@@ -95,7 +98,7 @@ const ForumsPage = () => {
       <PageHeader
         title="Community forums"
         subtitle="Collaborate with peers, seek expert help, and share farming knowledge."
-        actions={<Button onClick={openCreateForum}>Start new forum</Button>}
+        actions={isAdmin ? <Button onClick={openCreateForum}>Start new forum</Button> : null}
       />
       <div className="forum-layout">
         <div className="card">
@@ -113,14 +116,22 @@ const ForumsPage = () => {
                 {
                   label: 'Reply',
                   onClick: (forum) => openCreatePost(forum)
-                }
+                },
+                ...(isAdmin ? [{
+                  label: 'Delete',
+                  intent: 'danger',
+                  onClick: (forum) => {
+                    removeForum(forum.id);
+                    pushNotification({ title: 'Forum removed (temporary)', message: forum.title, status: 'warning' });
+                  }
+                }] : [])
               ]}
             />
           ) : (
             <EmptyState
               title="No forums yet"
               description="Be the first to start a discussion for your community."
-              actions={<Button onClick={openCreateForum}>Start a forum</Button>}
+              actions={isAdmin ? <Button onClick={openCreateForum}>Start a forum</Button> : null}
             />
           )}
         </div>

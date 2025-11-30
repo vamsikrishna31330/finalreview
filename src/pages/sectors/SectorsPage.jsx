@@ -30,6 +30,9 @@ const SectorsPage = () => {
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
 
+  // Check if user has admin privileges
+  const isAdmin = user?.role === 'admin';
+
   // Debug logging
   console.log('SectorsPage debug:', { sectors, loading, error });
 
@@ -131,24 +134,26 @@ const SectorsPage = () => {
       <PageHeader
         title="Sector partners"
         subtitle="Manage partners who support farmers through finance, logistics, technology, and more."
-        actions={<Button onClick={openCreate}>Add sector</Button>}
+        actions={isAdmin ? <Button onClick={openCreate}>Add sector</Button> : null}
       />
       <div className="card">
         {loading ? null : sectors.length ? (
           <DataTable
             columns={columns}
             data={sectors}
-            actions={[
+            actions={isAdmin ? [
               { label: 'Edit', onClick: openEdit },
               { label: 'Delete', intent: 'danger', onClick: handleDelete }
+            ] : [
+              { label: 'Delete', intent: 'danger', onClick: handleDelete }
             ]}
-            onRowClick={openEdit}
+            onRowClick={isAdmin ? openEdit : null}
           />
         ) : (
           <EmptyState
             title="No sector partners"
             description="Document finance, logistics, research and other partners here."
-            actions={<Button onClick={openCreate}>Add partner</Button>}
+            actions={isAdmin ? <Button onClick={openCreate}>Add partner</Button> : null}
           />
         )}
       </div>

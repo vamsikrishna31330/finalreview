@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTempStore } from '../../hooks/useTempStore.js';
+import { useDatabase } from '../../hooks/useDatabase.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useUI } from '../../hooks/useUI.js';
 import PageHeader from '../../components/PageHeader.jsx';
@@ -18,21 +18,83 @@ const initialForm = {
   description: '',
   link: '',
   file_name: '',
-  file_blob: null
+  file_blob: null,
+  file_type: 'document'
 };
 
 const ResourcesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { pushNotification } = useUI();
-  const { data: resources, create, update, delete: remove, loading, error } = useTempStore(
-    'resources',
-    'SELECT resources.*, users.name AS author_name FROM resources LEFT JOIN users ON users.id = resources.created_by ORDER BY created_at DESC'
-  );
+  const { query, run } = useDatabase();
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  // Load resources from database
+  const loadResources = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await query('SELECT resources.*, users.name AS author_name FROM resources LEFT JOIN users ON users.id = resources.created_by ORDER BY created_at DESC');
+      setResources(data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error loading resources:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load resources on component mount
+  useEffect(() => {
+    loadResources();
+  }, []);
+
+  // Create resource
+  const create = async (resourceData) => {
+    try {
+      const result = await run(
+        'INSERT INTO resources (title, category, description, link, file_name, file_blob, file_type, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+        [resourceData.title, resourceData.category, resourceData.description, resourceData.link, resourceData.file_name, resourceData.file_blob, resourceData.file_type, resourceData.created_by]
+      );
+      await loadResources(); // Reload data
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Update resource
+  const update = async (id, resourceData) => {
+    try {
+      const result = await run(
+        'UPDATE resources SET title = $1, category = $2, description = $3, link = $4, file_name = $5, file_blob = $6, file_type = $7 WHERE id = $8',
+        [resourceData.title, resourceData.category, resourceData.description, resourceData.link, resourceData.file_name, resourceData.file_blob, resourceData.file_type, id]
+      );
+      await loadResources(); // Reload data
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Delete resource
+  const remove = async (id) => {
+    try {
+      await run('DELETE FROM resources WHERE id = $1', [id]);
+      await loadResources(); // Reload data
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Check if user has admin privileges
+  const isAdmin = user?.role === 'admin';
 
   const categories = useMemo(
     () => ['Guides', 'Finance', 'Policy', 'Training', 'Technology', 'Data', 'Marketplace'],
@@ -57,19 +119,28 @@ const ResourcesPage = () => {
       description: resource.description ?? '',
       link: resource.link ?? '',
       file_name: resource.file_name ?? '',
-      file_blob: resource.file_blob ?? null
+      file_blob: resource.file_blob ?? null,
+      file_type: resource.file_type ?? 'document'
     });
     setEditingId(resource.id);
     setOpenModal(true);
   };
 
-  const handleDelete = (resource) => {
-    remove(resource.id);
-    pushNotification({
-      title: 'Resource removed',
-      message: `${resource.title} deleted (temporary)`,
-      status: 'warning'
-    });
+  const handleDelete = async (resource) => {
+    try {
+      await remove(resource.id);
+      pushNotification({
+        title: 'Resource removed',
+        message: `${resource.title} deleted successfully`,
+        status: 'success'
+      });
+    } catch (err) {
+      pushNotification({
+        title: 'Error',
+        message: 'Failed to delete resource',
+        status: 'error'
+      });
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -85,17 +156,18 @@ const ResourcesPage = () => {
       link: form.link,
       file_name: form.file_name,
       file_blob: form.file_blob,
+      file_type: form.file_type,
       created_by: user.id,
       author_name: user.name
     };
     
     try {
       if (editingId) {
-        update(editingId, payload);
-        pushNotification({ title: 'Resource updated (temporary)', message: payload.title, status: 'success' });
+        await update(editingId, payload);
+        pushNotification({ title: 'Resource updated', message: payload.title, status: 'success' });
       } else {
-        create(payload);
-        pushNotification({ title: 'Resource added (temporary)', message: payload.title, status: 'success' });
+        await create(payload);
+        pushNotification({ title: 'Resource added', message: payload.title, status: 'success' });
       }
     } catch (error) {
       pushNotification({ title: 'Error', message: 'Failed to save resource', status: 'error' });
@@ -112,7 +184,14 @@ const ResourcesPage = () => {
       return;
     }
     const base64 = await fileToBase64(file);
-    setForm((prev) => ({ ...prev, file_name: file.name, file_blob: base64, link: '' }));
+    const fileType = file.type.startsWith('video/') ? 'video' : 'document';
+    setForm((prev) => ({ 
+      ...prev, 
+      file_name: file.name, 
+      file_blob: base64, 
+      link: '',
+      file_type: fileType
+    }));
   };
 
   const columns = [
@@ -129,9 +208,15 @@ const ResourcesPage = () => {
               Visit
             </a>
           ) : row.file_name ? (
-            <button type="button" onClick={() => navigate(`/resources/${row.id}`)}>
-              Download
-            </button>
+            row.file_type === 'video' ? (
+              <button type="button" onClick={() => navigate(`/video/${row.id}`)}>
+                🎥 Watch
+              </button>
+            ) : (
+              <button type="button" onClick={() => navigate(`/resources/${row.id}`)}>
+                Download
+              </button>
+            )
           ) : (
             'N/A'
           )}
@@ -146,15 +231,17 @@ const ResourcesPage = () => {
       <PageHeader
         title="Resource library"
         subtitle="Central repository of guides, finance templates, policies, and multimedia for all roles."
-        actions={<Button onClick={handleOpenCreate}>Add resource</Button>}
+        actions={isAdmin ? <Button onClick={handleOpenCreate}>Add resource</Button> : null}
       />
       <div className="card">
         {resources.length ? (
           <DataTable
             columns={columns}
             data={resources}
-            actions={[
+            actions={isAdmin ? [
               { label: 'Edit', onClick: handleEdit },
+              { label: 'Delete', intent: 'danger', onClick: handleDelete }
+            ] : [
               { label: 'Delete', intent: 'danger', onClick: handleDelete }
             ]}
           />
@@ -162,7 +249,7 @@ const ResourcesPage = () => {
           <EmptyState
             title="No resources yet"
             description="Admins and experts can populate guides, forms, and data sets."
-            actions={<Button onClick={handleOpenCreate}>Add your first resource</Button>}
+            actions={isAdmin ? <Button onClick={handleOpenCreate}>Add your first resource</Button> : null}
           />
         )}
       </div>
@@ -222,7 +309,7 @@ const ResourcesPage = () => {
               />
             </div>
           </FormSection>
-          <FormSection title="Access" description="Either provide an external link or upload the document.">
+          <FormSection title="Access" description="Provide an external link, upload a document, or add a video file.">
             <div className="form-grid">
               <div className="field">
                 <label htmlFor="link">External link</label>
@@ -235,12 +322,20 @@ const ResourcesPage = () => {
                 />
               </div>
               <div className="field">
-                <label htmlFor="file">Upload document</label>
-                <input id="file" type="file" onChange={handleFileUpload} />
+                <label htmlFor="file">Upload file (Document or Video)</label>
+                <input 
+                  id="file" 
+                  type="file" 
+                  accept=".pdf,.doc,.docx,.txt,.mp4,.avi,.mov,.wmv,.webm"
+                  onChange={handleFileUpload} 
+                />
               </div>
             </div>
             {form.file_name && (
-              <p className="file-preview">Selected file: {form.file_name}</p>
+              <p className="file-preview">
+                Selected file: {form.file_name} 
+                {form.file_type === 'video' && ' 🎥 Video'}
+              </p>
             )}
           </FormSection>
         </form>

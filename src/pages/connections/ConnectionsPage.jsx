@@ -31,6 +31,9 @@ const ConnectionsPage = () => {
   const [form, setForm] = useState(defaultForm);
   const [editingId, setEditingId] = useState(null);
 
+  // Check if user has admin privileges
+  const isAdmin = user?.role === 'admin';
+
   const farmerOptions = useMemo(() => users.map((user) => ({ value: user.id, label: user.name })), [users]);
   const sectorOptions = useMemo(() => sectors.map((sector) => ({ value: sector.id, label: sector.name })), [sectors]);
 
@@ -88,7 +91,7 @@ const ConnectionsPage = () => {
       <PageHeader
         title="Sector connections"
         subtitle="Track how farmers collaborate with sector partners and manage the lifecycle of engagements."
-        actions={<Button onClick={openCreate}>Create connection</Button>}
+        actions={isAdmin ? <Button onClick={openCreate}>Create connection</Button> : null}
       />
       <div className="card">
         {connections.length ? (
@@ -100,17 +103,19 @@ const ConnectionsPage = () => {
               { title: 'Notes', accessor: 'notes' }
             ]}
             data={connections}
-            actions={[
+            actions={isAdmin ? [
               { label: 'Edit', onClick: openEdit },
               { label: 'Delete', intent: 'danger', onClick: removeConnection }
+            ] : [
+              { label: 'Delete', intent: 'danger', onClick: removeConnection }
             ]}
-            onRowClick={openEdit}
+            onRowClick={isAdmin ? openEdit : null}
           />
         ) : (
           <EmptyState
             title="No connections"
             description="Link farmers with partners to track collaborations."
-            actions={<Button onClick={openCreate}>Add connection</Button>}
+            actions={isAdmin ? <Button onClick={openCreate}>Add connection</Button> : null}
           />
         )}
       </div>
